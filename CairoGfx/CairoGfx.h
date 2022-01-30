@@ -9,3 +9,4 @@
 #include "CairoMatrix.h"
 #include "CairoPattern.h"
 #include "StandardColors.h"
+#include "CairoRegion.h"

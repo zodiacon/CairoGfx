@@ -47,14 +47,19 @@ void CView::Test2(CairoCtx& ctx) {
 void CView::Test3(CairoCtx& ctx) {
 	ctx.Clear(StandardColors::White);
 	CairoColor colors[] = {
+		StandardColors::OrangeRed,
 		StandardColors::Brown,
+		StandardColors::Green,
 		StandardColors::LightBlue,
-		StandardColors::DarkGreen,
-		StandardColors::OrangeRed
 	};
 	double startAngle = m_Angle;
-	ctx.FontSize(20);
-	char text[] = "A";
+	ctx.FontSize(25);
+	char text[] = "asdfghjklzxcvb";
+	CFont font;
+	font.CreatePointFont(100, L"HamburgSymbols");
+	CairoFont cfont(font);
+	ctx.FontFace(cfont);
+
 	for (int i = 0; i < 12; i++) {
 		auto angle = startAngle + 30 * i;
 		ctx.Arc(500, 500, 400, Rad(angle), Rad(angle + 30)).
@@ -66,9 +71,10 @@ void CView::Test3(CairoCtx& ctx) {
 		angle += 15;
 		double x = 500 + 375 * std::cos(Rad(angle));
 		double y = 500 + 375 * std::sin(Rad(angle));
-		text[0] = i + 'A';
-		auto ext = ctx.TextExtents(text);
-		ctx.MoveTo(x - ext.width / 2, y + ext.width / 2).ShowText(text);
+		char sign[] = "a";
+		sign[0] = text[i];
+		auto ext = ctx.TextExtents(sign);
+		ctx.MoveTo(x - ext.width / 2, y + ext.width / 2).ShowText(sign);
 		ctx.NewPath();
 	}
 }
@@ -108,12 +114,44 @@ void CView::Test4(CairoCtx& ctx) {
 	//ctx.LineWidth(1).SourceColor(1, 1, 0).Stroke();
 
 	CStringA text;
-	text.Format("CPU: %.2f%% Kernel: %.2f%%", value.doubleValue, value2.doubleValue);
+	text.Format("CPU: %.2lf%% Kernel: %.2lf%%", value.doubleValue, value2.doubleValue);
 	ctx.MoveTo(20, b + 50).SourceColor(StandardColors::White).FontSize(30).ShowText(text);
 
 	if (count == _countof(data))
 		count = 0;
 	m_Index = count;
+}
+
+void CView::Test5(CairoCtx& ctx) {
+	auto surface = CairoSurface::CreateWithDib(CairoFormat::RGB24, 300, 300);
+	auto status = surface.Status();
+	ATLASSERT(status == CairoStatus::Success);
+
+	{
+		CairoCtx ctx2(surface);
+		ctx2.Clear(StandardColors::Yellow);
+		ctx2.MoveTo(50, 120).FontSize(20).SourceColor(StandardColors::Blue);
+		ctx2.Rotate(Rad(45));
+		ctx2.ShowText("Hello, pattern!");
+		//surface.WriteToPng("c:\\temp\\test.png");
+	}
+	ctx.Clear(StandardColors::LightGray).Scale(2, 2);
+	ctx.Source(surface, 100, 100);
+	ctx.Paint();
+}
+
+LRESULT CView::OnCreate(UINT, WPARAM, LPARAM, BOOL&) {
+	auto res = ::FindResource(nullptr, MAKEINTRESOURCE(IDR_HAMBURG), L"TTF");
+	ATLASSERT(res);
+	auto hGlobal = ::LoadResource(nullptr, res);
+	ATLASSERT(hGlobal);
+	auto size = ::SizeofResource(nullptr, res);
+	auto p = ::LockResource(hGlobal);
+	DWORD count;
+	auto handle = ::AddFontMemResourceEx(p, size, nullptr, &count);
+	ATLASSERT(handle);
+
+	return 0;
 }
 
 LRESULT CView::OnTimer(UINT /*uMsg*/, WPARAM id, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
@@ -127,7 +165,7 @@ LRESULT CView::OnTimer(UINT /*uMsg*/, WPARAM id, LPARAM /*lParam*/, BOOL& /*bHan
 
 			case 2:
 			case 3:
-				m_Angle += .4;
+				m_Angle += .3;
 				Invalidate(FALSE);
 				UpdateWindow();
 				break;
@@ -145,6 +183,7 @@ void CView::DoPaint(HDC hdc) {
 		case 1: Test2(cairo); break;
 		case 2: Test3(cairo); break;
 		case 3: Test4(cairo); break;
+		case 4: Test5(cairo); break;
 	}
 }
 

@@ -66,6 +66,13 @@ CairoPattern::operator cairo_pattern_t* () const {
 	return m_pattern;
 }
 
+CairoSurface CairoPattern::Surface() const {
+	cairo_surface_t* surface;
+	cairo_pattern_get_surface(m_pattern, &surface);
+	cairo_surface_reference(surface);
+	return CairoSurface(surface);
+}
+
 CairoStatus CairoPattern::Status() const {
 	return static_cast<CairoStatus>(cairo_pattern_status(m_pattern));
 }

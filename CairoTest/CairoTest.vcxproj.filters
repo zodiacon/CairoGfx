@@ -61,4 +61,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="res\HamburgSymbols.ttf" />
+  </ItemGroup>
 </Project>

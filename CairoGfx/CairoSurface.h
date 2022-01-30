@@ -44,6 +44,8 @@ public:
 	CairoSurface(CairoSurface&& other);
 	CairoSurface& operator=(CairoSurface&& other);
 
+	static CairoSurface CreateImage(CairoFormat format, int width, int height);
+	static CairoSurface CreatePrinting(HDC hdc);
 	static CairoSurface CreateWithDib(CairoFormat format, int width, int height);
 	static CairoSurface CreateWithDdb(HDC hdc, CairoFormat format, int width, int height);
 	static CairoSurface CreateFromPng(char const* filename);
@@ -58,6 +60,7 @@ public:
 
 	operator cairo_surface_t* ();
 	operator const cairo_surface_t* () const;
+	operator bool() const;
 
 	CairoSurface& Flush();
 	CairoSurface& Finish();
@@ -81,12 +84,14 @@ public:
 	CairoContent Content() const;
 	CairoFormat Format() const;
 	unsigned char* Data() const;
+	CairoSurface Image() const;
 
 protected:
 	explicit CairoSurface(cairo_surface_t* surface);
 	virtual void Destroy();
 
 	friend class CairoCtx;
+	friend class CairoPattern;
 
 	cairo_surface_t* m_surface;
 };

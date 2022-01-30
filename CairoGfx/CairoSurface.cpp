@@ -26,6 +26,14 @@ CairoSurface& CairoSurface::operator=(CairoSurface&& other) {
 	return *this;
 }
 
+CairoSurface CairoSurface::CreateImage(CairoFormat format, int width, int height) {
+	return CairoSurface(cairo_image_surface_create(static_cast<cairo_format_t>(format), width, height));
+}
+
+CairoSurface CairoSurface::CreatePrinting(HDC hdc) {
+	return CairoSurface(cairo_win32_printing_surface_create(hdc));
+}
+
 CairoSurface CairoSurface::CreateWithDib(CairoFormat format, int width, int height) {
 	return CairoSurface(cairo_win32_surface_create_with_dib(static_cast<cairo_format_t>(format), width, height));
 }
@@ -151,6 +159,14 @@ unsigned char* CairoSurface::Data() const {
 	return cairo_image_surface_get_data(m_surface);
 }
 
+CairoSurface CairoSurface::Image() const {
+	auto image = cairo_win32_surface_get_image(m_surface);
+	if (image) {
+		cairo_surface_reference(image);
+	}
+	return CairoSurface(image);
+}
+
 void CairoSurface::Destroy() {
 	if (m_surface) {
 		cairo_surface_destroy(m_surface);
@@ -168,6 +184,10 @@ CairoSurface::operator cairo_surface_t* () {
 
 CairoSurface::operator const cairo_surface_t* () const {
 	return m_surface;
+}
+
+CairoSurface::operator bool() const {
+	return m_surface != nullptr;
 }
 
 void CairoMappedSurface::Destroy() {
